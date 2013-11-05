@@ -134,8 +134,7 @@ OBJS=$(SIM_OBJ) $(foreach builtin,$(KERNEL_BUILTIN),$(if $($(builtin)),$($(built
 
 # For FreeBSD config build
 config: Makefile.config Makefile
-#	rm -f $(KERNEL_DIR)/sys/conf/*.sim
-#	/bin/cp -f sim/conf/*.sim $(KERNEL_DIR)/sys/conf/
+	cd $(SRCDIR)/sys; ln -s x86/include machine
 	make -f Makefile.config
 	rm -rf compile
 	mkdir -p compile
