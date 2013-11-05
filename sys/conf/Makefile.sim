@@ -1,0 +1,47 @@
+# Makefile.sim -- with config changes.
+# Copyright 1990 W. Jolitz
+#	from: src/sys/conf/Makefile.alpha,v 1.76
+# $FreeBSD$
+#
+# Makefile for FreeBSD
+#
+# This makefile is constructed from a machine description:
+#	config machineid
+# Most changes should be made in the machine description
+#	/sys/sim/conf/``machineid''
+# after which you should do
+#	 config machineid
+# Generic makefile changes should be made in
+#	/sys/conf/Makefile.sim
+# after which config should be rerun for all machines.
+#
+
+# Which version of config(8) is required.
+%VERSREQ=	600004
+
+MACHINE=sim
+
+
+STD8X16FONT?=	iso
+
+INCLUDES+=
+
+CFLAGS+=
+
+ASM_CFLAGS= -x assembler-with-cpp -Wa,-x -DLOCORE ${CFLAGS}
+
+%BEFORE_DEPEND
+
+%OBJS
+
+%FILES.c
+
+%FILES.s
+
+%FILES.m
+
+%CLEAN
+
+%RULES
+
+#.include "$S/conf/kern.post.mk"

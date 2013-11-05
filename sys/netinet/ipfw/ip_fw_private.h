@@ -218,7 +218,7 @@ struct ip_fw_chain {
 	struct ip_fw	**map;		/* array of rule ptrs to ease lookup */
 	LIST_HEAD(nat_list, cfg_nat) nat;       /* list of nat entries */
 	struct radix_node_head *tables[IPFW_TABLES_MAX];
-#if defined( __linux__ ) || defined( _WIN32 )
+#if !defined( __linux__ ) || defined( _WIN32 )
 	spinlock_t rwmtx;
 	spinlock_t uh_lock;
 #else

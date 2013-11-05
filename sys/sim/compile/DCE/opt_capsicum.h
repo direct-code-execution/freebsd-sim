@@ -1,0 +1,2 @@
+#define CAPABILITIES 1
+#define CAPABILITY_MODE 1
