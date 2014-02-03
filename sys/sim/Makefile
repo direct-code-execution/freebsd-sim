@@ -55,7 +55,7 @@ ifeq ($(PROCESSOR_SIZE),64)
 CFLAGS+= -DCONFIG_64BIT
 endif
 
-LDFLAGS += -shared -nostdlib -lc -g3 -Wl,-O0 -Wl,-Tlinker.lds 
+LDFLAGS += -shared -nodefaultlibs -lc -g3 -Wl,-O0 -Wl,-Tlinker.lds 
 
 modules:=
 all-obj-for-clean:=
@@ -134,7 +134,7 @@ OBJS=$(SIM_OBJ) $(foreach builtin,$(KERNEL_BUILTIN),$(if $($(builtin)),$($(built
 
 # For FreeBSD config build
 config: Makefile.config Makefile
-	cd $(SRCDIR)/sys; ln -s x86/include machine
+	cd $(SRCDIR)/sys; ln -s -f x86/include machine
 	make -f Makefile.config
 	rm -rf compile
 	mkdir -p compile
