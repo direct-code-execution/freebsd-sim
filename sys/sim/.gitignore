@@ -5,3 +5,5 @@ timeconst.h
 *.o
 ../*/*.o
 config
+core*
+compile

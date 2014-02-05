@@ -1,1 +1,0 @@
-#define INCLUDE_CONFIG_FILE 1

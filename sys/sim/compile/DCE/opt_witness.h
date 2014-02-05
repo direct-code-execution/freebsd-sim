@@ -1,1 +1,0 @@
-#define WITNESS_SKIPSPIN 1
