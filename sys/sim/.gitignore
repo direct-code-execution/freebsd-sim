@@ -1,0 +1,11 @@
+linker.lds
+autoconf.h
+objs.mk
+timeconst.h
+*.o
+../*/*.o
+config
+core*
+compile
+vers.c
+version

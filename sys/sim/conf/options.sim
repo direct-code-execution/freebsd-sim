@@ -1,0 +1,5 @@
+# $FreeBSD$
+# Options specific to sim platform kernels
+
+SIMCPU			opt_cpu.h
+
