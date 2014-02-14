@@ -1,0 +1,26 @@
+# inherit $(objdir) $(config) $(srcdir) $(to_keep) from command-line
+
+obj-y = $(srcdir)*.c
+
+to_keep_list=$(subst :, ,$(to_keep))
+
+tmp1-obj-y := $(wildcard $(obj-y))
+tmp2-obj-y=$(notdir $(tmp1-obj-y))
+tmp3-obj-y=$(patsubst %.c,%.o,$(tmp2-obj-y))
+tmp4-obj-y=$(if $(to_keep_list),$(filter $(to_keep_list),$(tmp3-obj-y)),$(tmp3-obj-y))
+final-obj-y=$(tmp4-obj-y)
+
+print: $(final-obj-m) $(subdirs)
+	@if test $(if $(final-obj-y),1); then \
+	  echo -n $(objdir)builtin.o; echo -n "="; echo $(addprefix $(objdir),$(final-obj-y)); \
+	  echo -n $(objdir)builtin.o; echo -n ": "; echo $(addprefix $(objdir),$(final-obj-y)); \
+	  echo -n "all-obj-for-clean+="; echo $(addprefix $(objdir),$(final-obj-y)) $(objdir)builtin.o; \
+	fi
+$(final-obj-m):
+	@echo -n "modules+="; echo $(addprefix $(objdir),$(@:.o=.ko))
+	@echo -n $(addprefix $(objdir),$(@:.o=.ko)); echo -n ": "
+	@echo $(addprefix $(objdir),$(if $($(@:.o=-objs)),$($(@:.o=-objs)),$@))
+	@echo -n $(addprefix $(objdir),$(@:.o=.ko)); echo -n "="
+	@echo $(addprefix $(objdir),$(if $($(@:.o=-objs)),$($(@:.o=-objs)),$@))
+$(subdirs):
+	@$(MAKE) -s -f $(firstword $(MAKEFILE_LIST)) objdir=$(objdir)$@/ config=$(config) srcdir=$(srcdir)$@/ to_keep=$(to_keep) print 2>/dev/null
