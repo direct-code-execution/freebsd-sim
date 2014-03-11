@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/socketvar.h>
 #include <sys/uio.h>
+#include <sys/ioccom.h>
 #include <net/if.h>
 
 struct SimSocket
@@ -228,28 +229,25 @@ int sim_sock_accept (struct SimSocket *socket, struct SimSocket **new_socket, in
   soref(newsock);
   return 0;
 }
-int sim_sock_ioctl (struct SimSocket *socket, int request, char *argp)
+int sim_sock_ioctl (struct SimSocket *socket, unsigned long cmd, char *data)
 {
-  sim_assert (0);
-#ifdef FIXME
-  struct socket *sock = (struct socket *)socket;
-  struct sock *sk;
-  struct net *net;
-  int err;
+  struct socket *so = (struct socket *)socket;
+  int error;
 
-  sk = sock->sk;
-  net = sock_net(sk);
+  if (IOCGROUP(cmd) == 'i')
+    error = ifioctl(so, cmd, data, curthread);
+  else if (IOCGROUP(cmd) == 'r') {
+    CURVNET_SET(so->so_vnet);
+    error = rtioctl_fib(cmd, data, so->so_fibnum);
+    CURVNET_RESTORE();
+  } else {
+    CURVNET_SET(so->so_vnet);
+    error = ((*so->so_proto->pr_usrreqs->pru_control)
+             (so, cmd, data, 0, curthread));
+    CURVNET_RESTORE();
+  }
 
-  err = sock->ops->ioctl(sock, request, (long)argp);
-
-  /*
-   * If this ioctl is unknown try to hand it down
-   * to the NIC driver.
-   */
-  if (err == -ENOIOCTLCMD)
-    err = dev_ioctl(net, request, argp);
-  return err;
-#endif
+  return error;
 }
 int sim_sock_setsockopt (struct SimSocket *socket, int level, int optname,
 			 const void *optval, int optlen)
