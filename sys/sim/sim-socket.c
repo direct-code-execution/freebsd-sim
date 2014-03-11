@@ -156,14 +156,9 @@ int sim_sock_connect (struct SimSocket *socket, const struct sockaddr *name, int
   int interrupted = 0;
   int error = 0;
   while ((sock->so_state & SS_ISCONNECTING) && sock->so_error == 0) {
-    /* FIXME */
-#if 0
-    sim_event_schedule_ns ((1) * 1000000, &msleep_trampoline, sim_task_current ());
-    sim_task_wait ();
-#else
+    /* FIXME (only blocking connect) */
     error = msleep(&sock->so_timeo, SOCK_MTX(sock), PSOCK | PCATCH,
-                   "sim_connec", 1 /* FIXME */); 
-#endif
+                   "sim_connec", 0); 
     if (error) {
       if (error == EINTR || error == ERESTART)
         interrupted = 1;
@@ -202,7 +197,7 @@ int sim_sock_accept (struct SimSocket *socket, struct SimSocket **new_socket, in
 
   while (TAILQ_EMPTY(&sock->so_comp) && sock->so_error == 0) {
     err = msleep(&sock->so_timeo, SOCK_MTX(sock), PSOCK | PCATCH,
-                 "accept", 1);  /* FIXME: should be 0: wakeup at the other lock side (SOCK_MTX) */
+                 "accept", 0);  /* FIXME: should be 0: wakeup at the other lock side (SOCK_MTX) */
     if (err) {
       return -EAGAIN;
     }

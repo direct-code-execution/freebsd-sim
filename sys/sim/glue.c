@@ -74,7 +74,6 @@ struct ipsecrequest;
 struct selinfo;
 struct sigio;
 
-#define	atomic_add_rel_int		atomic_add_barr_int
 void
 bzero(void *buf, size_t len)
 {
@@ -466,27 +465,6 @@ int tvtohz(struct timeval *tv)
   if (ticks > INT_MAX)
     ticks = INT_MAX;
   return ((int)ticks);
-}
-
-
-extern void sim_softirq_wakeup (void);
-
-/*
- * Make all processes sleeping on the specified identifier runnable.
- */
-void wakeup(register void *ident)
-{
-  sim_softirq_wakeup ();
-}
-
-/*
- * Make a process sleeping on the specified identifier runnable.
- * May wake more than one process if a target process is currently
- * swapped out.
- */
-void wakeup_one(register void *ident)
-{
-  sim_softirq_wakeup ();
 }
 
 vm_offset_t kmem_malloc(vm_map_t map, vm_size_t size, int flags)
@@ -1452,6 +1430,11 @@ void
 atomic_add_barr_int(volatile u_int32_t *p, u_int32_t val)
 {
   *p += val;
+}
+void
+atomic_add_rel_int(volatile u_int32_t *p, u_int32_t val)
+{
+  atomic_add_barr_int (p, val);
 }
 
 
