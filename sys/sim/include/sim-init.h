@@ -45,6 +45,8 @@ struct SimExported
   void (*dev_set_mtu) (struct SimDevice *dev, int mtu);
   struct SimDevicePacket (*dev_create_packet) (struct SimDevice *dev, int size);
   void (*dev_rx) (struct SimDevice *dev, struct SimDevicePacket packet);
+  void (*dev_ipv4_set_address) (struct SimDevice *device, uint32_t ipn,
+                                    uint32_t ip_maskn);
 
   void (*sys_iterate_files) (const struct SimSysIterator *iter);
   int (*sys_file_read) (const struct SimSysFile *file, char *buffer, int size, int offset);
