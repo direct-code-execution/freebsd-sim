@@ -1,14 +1,17 @@
 #include <sys/errno.h>
+#include <sys/param.h>
 #include <sys/time.h>
+#include <sys/kernel.h>
 #include <sys/sdt.h>
+#include <sys/queue.h>
+#include <sys/stddef.h>
 #include "sim.h"
 #include "sim-assert.h"
 
 // kern/kern_clock.c
 long tk_nin;
-int ticks;
 
-#define HZ 1000
+#define HZ hz
 
 // accessed from wrap_clock from do_sys_settimeofday. We don't call the latter
 // so we should never access this variable.
@@ -74,58 +77,43 @@ unsigned long round_ticks_up(unsigned long j)
 {
   return round_ticks_common(j, true);
 }
+
+struct sleep_barrier {
+  void *ident;
+  void *event;
+  struct SimTask      *waiter;
+  LIST_ENTRY(sleep_barrier) entries;
+};
+
+static LIST_HEAD(sleep_barrier_list, sleep_barrier) g_sleep_events = 
+  LIST_HEAD_INITIALIZER(&sleep_barrier_list);
+
 void msleep_trampoline (void *context)
 {
-  struct SimTask *task = context;
+  struct sleep_barrier *barr = context;
+  struct SimTask *task = barr->waiter;
   sim_task_wakeup (task);
+  sim_free (barr);
 }
 
 int
 _sleep(void *ident, struct lock_object *lock, int priority,
     const char *wmesg, sbintime_t sbt, sbintime_t pr, int flags)
 {
+  struct sleep_barrier *barr = sim_malloc (sizeof (struct sleep_barrier));
+  sim_memset (barr, 0, sizeof (struct sleep_barrier));
+  barr->ident = ident;
+  barr->waiter = sim_task_current ();
+
   if (sbt)
     {
-      sim_event_schedule_ns (((__u64) sbt) * (1000000/HZ),
-                             &msleep_trampoline, sim_task_current ());
+      barr->event = sim_event_schedule_ns (((__u64) sbt) * (1000000000/HZ),
+                                           &msleep_trampoline, barr);
     }
+
+  LIST_INSERT_HEAD(&g_sleep_events, barr, entries);
   sim_task_wait ();
   return 0;
-}
-
-/* FIXME: XXX!!! _sleep/wakeup should be implemented for sbwait like operation */
-#if 0
-struct sleep_barrier {
-  void *indent;
-  struct SimTask      *waiter;
-};
-
-static void
-sleep_function (void *context)
-{
-  while (true)
-    {
-      sim_task_wait ();
-      while (!list_empty (&g_work))
-       {
-         struct work_struct *work = list_first_entry(&g_work,
-                                                     struct work_struct, entry);
-         work_func_t f = work->func;
-         __list_del (work->entry.prev, work->entry.next);
-         work_clear_pending (work);
-         f(work);
-       }
-    }
-}
-
-static struct SimTask *sleep_task (void)
-{
-  static struct SimTask *g_task = 0;
-  if (g_task == 0)
-    {
-      g_task = sim_task_start (&sleep_function, 0);
-    }
-  return g_task;
 }
 
 /*
@@ -133,8 +121,24 @@ static struct SimTask *sleep_task (void)
  */
 void wakeup(register void *ident)
 {
-  struct sleep_barrier *barr = (struct sleep_barrier *)ident;
+  struct sleep_barrier *barr = NULL;
+
+  LIST_FOREACH(barr, &g_sleep_events, entries)
+    if (barr->ident == ident)
+      {
+        break;
+      }
+
+  if (!barr)
+    return;
+
+  LIST_REMOVE(barr, entries);
+
+  if (barr->event)
+    sim_event_cancel (barr->event);
+
   sim_task_wakeup (barr->waiter);
+  //sim_free (barr);
 }
 
 /*
@@ -144,7 +148,5 @@ void wakeup(register void *ident)
  */
 void wakeup_one(register void *ident)
 {
-  struct sleep_barrier *barr = (struct sleep_barrier *)ident;
-  sim_task_wakeup (barr->waiter);
+  wakeup (ident);
 }
-#endif
