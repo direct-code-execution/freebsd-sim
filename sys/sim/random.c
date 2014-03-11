@@ -21,3 +21,10 @@ u_int32_t arc4random(void)
 {
   return sim_random();
 }
+
+void
+arc4rand(void *ptr, u_int len, int reseed)
+{
+  get_random_bytes (ptr, len);
+  return;
+}

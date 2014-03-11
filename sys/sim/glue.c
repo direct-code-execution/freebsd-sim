@@ -47,7 +47,7 @@
 #include <sys/vnode.h>
 #include <sys/proc.h>
 #include <sys/file.h>
-
+#include <sys/module.h>
 
 #include <machine/stdarg.h>
 
@@ -73,6 +73,30 @@ struct linesw;
 struct ipsecrequest;
 struct selinfo;
 struct sigio;
+
+#define	atomic_add_rel_int		atomic_add_barr_int
+void
+bzero(void *buf, size_t len)
+{
+  char *ptr;
+  for (ptr = (char *)buf; len--; )
+    *ptr++ = 0;
+}
+
+void
+bcopy(const void *src0, void *dst0, size_t length)
+{
+  char *ptr;
+  for (ptr = (char *)src0; length--; )
+    *(char *)dst0++ = *ptr++;
+}
+
+void *
+memcpy(void *dst0, const void *src0, size_t length)
+{
+  bcopy((src0), (dst0), (length));
+  return dst0;
+}
 
 #define UNIMPLEMENED_NOASSERT() sim_assert (0)/*\ 
 	debugf("%s:%d] Function %s unimplemented. Called from: %x %x\n", \
@@ -121,7 +145,11 @@ int getenv_quad(const char *name, quad_t *data)
   return 0;
 }
 
-
+char *
+getenv(const char *name)
+{
+  return NULL;
+}
 
 /*
  * Shortcut to hide contents of struct td and struct proc from the
@@ -153,15 +181,6 @@ int resource_find_dev(int *anchor, const char *name, int *unit,
 {
   UNIMPLEMENED_NOASSERT();
   return (int)1;
-}
-
-/*
- * Kernel version which takes radix argument vsnprintf(3).
- */
-int vsnrprintf(char *str, size_t size, int radix, const char *format, 
-    va_list ap)
-{
-  return vsprintf (str, format, ap);
 }
 
 /*
@@ -219,39 +238,6 @@ void nsc_log(int a, const char *b, ...)
   printf("log: '%s'\n", b);
 }
 
-
-/*
- * Scaled down version of printf(3).
- *
- * Two additional formats:
- *
- * The format %b is supported to decode error registers.
- * Its usage is:
- *
- *      printf("reg=%b\n", regval, "<base><arg>*");
- *
- * where <base> is the output base expressed as a control character, e.g.
- * \10 gives octal; \20 gives hex.  Each arg is a sequence of characters,
- * the first of which gives the bit number to be inspected (origin 1), and
- * the next characters (up to a control character, i.e. a character <= 32),
- * give the name of the register.  Thus:
- *
- *      kvprintf("reg=%b\n", 3, "\10\2BITTWO\1BITONE\n");
- *
- * would produce output:
- *
- *      reg=3<BITTWO,BITONE>
- *
- * XXX:  %D  -- Hexdump, takes pointer and separator string:
- *              ("%6D", ptr, ":")   -> XX:XX:XX:XX:XX:XX
- *              ("%*D", len, ptr, " " -> XX XX XX XX ...
- */
-int kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, 
-    va_list ap)
-{
-  printf("kvprintf: %s\n", fmt);
-  return (int)0;
-}
 
 
 /*
@@ -384,6 +370,11 @@ uma_zone_exhausted_nolock(uma_zone_t zone)
   return 0;
 }
 
+void
+uma_zone_set_warning(uma_zone_t zone, const char *warning)
+{
+  zone->uz_warning = warning;
+}
 
 /*
  * General routine to allocate a hash table.
@@ -671,7 +662,6 @@ int cr_cansee(struct ucred *u1, struct ucred *u2)
   return 0;
 }
 
-#if 1
 /*
  * The important part of mtx_trylock{,_flags}()
  * Tries to acquire lock `m.' We do NOT handle recursion here.  If this
@@ -701,9 +691,129 @@ void mtx_sysinit(void *arg)
 {
   return;
 }
-#endif
 
+void
+_mtx_init(volatile uintptr_t *c, const char *name, const char *type, int opts)
+{
+  return;
+}
 
+void
+_mtx_destroy(volatile uintptr_t *c)
+{
+  return;
+}
+
+void
+__mtx_lock_flags(volatile uintptr_t *c, int opts, const char *file, int line)
+{
+  return;
+}
+
+void
+__mtx_unlock_flags(volatile uintptr_t *c, int opts, const char *file, int line)
+{
+  return;
+}
+
+void
+__mtx_assert(const volatile uintptr_t *c, int what, const char *file, int line)
+{
+  return;
+}
+
+/* kern_rwlock.c */
+void
+_rw_init_flags(volatile uintptr_t *c, const char *name, int opts)
+{
+  return;
+}
+
+void
+_rw_destroy(volatile uintptr_t *c)
+{
+  return;
+}
+
+void
+rw_sysinit(void *arg)
+{
+  return;
+}
+
+void
+__rw_rlock(volatile uintptr_t *c, const char *file, int line)
+{
+  return;
+}
+
+void
+_rw_runlock_cookie(volatile uintptr_t *c, const char *file, int line)
+{
+  return;
+}
+
+void
+_rw_wlock_cookie(volatile uintptr_t *c, const char *file, int line)
+{
+  return;
+}
+
+void
+_rw_wunlock_cookie(volatile uintptr_t *c, const char *file, int line)
+{
+  return;
+}
+
+void
+__rw_assert(const volatile uintptr_t *c, int what, const char *file, int line)
+{
+  return;
+}
+
+int
+__rw_try_wlock(volatile uintptr_t *c, const char *file, int line)
+{
+  return 1;
+}
+
+/* kern_rmlock */
+void
+rm_init(struct rmlock *rm, const char *name)
+{
+  return;
+}
+
+void
+rm_init_flags(struct rmlock *rm, const char *name, int opts)
+{
+  return;
+}
+
+void
+_rm_wlock_debug(struct rmlock *rm, const char *file, int line)
+{
+  return;
+}
+
+void
+_rm_wunlock_debug(struct rmlock *rm, const char *file, int line)
+{
+  return;
+}
+
+/* kern_mutex.c */
+void
+mutex_init(void)
+{
+  return;
+}
+
+int
+witness_warn(int flags, struct lock_object *lock, const char *fmt, ...)
+{
+  return 0;
+}
 
 void disk_dev_synth(dev_t dev)
 {
@@ -774,9 +884,21 @@ void tunable_ulong_init(void *data)
 {
 }
 
-#if 1
+/* kern_sx.c */
+void
+sx_sysinit(void *arg)
+{
+  return;
+}
+
 void
 sx_init_flags(struct sx *sx, const char *description, int opts)
+{
+  return;
+}
+
+void
+sx_destroy(struct sx *sx)
 {
   return;
 }
@@ -807,7 +929,13 @@ _sx_assert(const struct sx *sx, int what, const char *file, int line)
 {
   return;
 }
-#endif
+
+void
+timekeep_push_vdso(void)
+{
+  return;
+}
+
 
 #if 0
 int knlist_empty(struct knlist *knl)
@@ -923,6 +1051,12 @@ void selwakeuppri(struct selinfo *sip, int pri)
   return;
 }
 
+void
+seldrain(struct selinfo *sip)
+{
+  return;
+}
+
 void malloc_uninit(void *data)
 {
   UNIMPLEMENED_NOASSERT();
@@ -941,13 +1075,6 @@ void malloc_init(void *data)
 void funsetown(struct sigio **sigiop)
 {
   return;
-}
-
-/* FIXME */
-size_t strlcpy (char *dst, const char *src, size_t size)
-{
-  strncpy (dst, src, size);
-  return size;
 }
 
 void *
@@ -1327,6 +1454,7 @@ atomic_add_barr_int(volatile u_int32_t *p, u_int32_t val)
   *p += val;
 }
 
+
 u_long
 atomic_cmpset_acq_ptr(volatile u_long *p, volatile u_long cmpval, volatile u_long newval)
 {
@@ -1340,3 +1468,47 @@ atomic_set_32(volatile uint32_t *address, uint32_t setmask)
 }
 
 struct fileops vnops;
+struct fileops badfileops;
+
+void
+vfs_timestamp(struct timespec *tsp)
+{
+  return;
+  sim_assert (false);
+}
+
+int
+vfs_modevent(module_t mod, int type, void *data)
+{
+  return 0;
+}
+
+struct vop_vector default_vnodeops;
+
+int
+vn_chown(struct file *fp, uid_t uid, gid_t gid, struct ucred *active_cred,
+    struct thread *td)
+{
+  return 0;
+}
+
+int
+invfo_chmod(struct file *fp, mode_t mode, struct ucred *active_cred,
+    struct thread *td)
+{
+	return (EINVAL);
+}
+
+int
+invfo_chown(struct file *fp, uid_t uid, gid_t gid, struct ucred *active_cred,
+    struct thread *td)
+{
+	return (EINVAL);
+}
+
+void
+devctl_notify(const char *system, const char *subsystem, const char *type,
+    const char *data)
+{
+  return;
+}

@@ -200,8 +200,13 @@ int sim_sock_accept (struct SimSocket *socket, struct SimSocket **new_socket, in
   struct sockaddr *nam = NULL;
   sock = (struct socket *)socket;
 
-  if (TAILQ_EMPTY(&sock->so_comp) && sock->so_error == 0)
-    return -EAGAIN;
+  while (TAILQ_EMPTY(&sock->so_comp) && sock->so_error == 0) {
+    err = msleep(&sock->so_timeo, SOCK_MTX(sock), PSOCK | PCATCH,
+                 "accept", 1);  /* FIXME: should be 0: wakeup at the other lock side (SOCK_MTX) */
+    if (err) {
+      return -EAGAIN;
+    }
+  }
 
 #if 0
   if(sock->so_error) {

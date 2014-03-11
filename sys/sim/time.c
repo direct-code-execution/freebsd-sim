@@ -1,7 +1,6 @@
-//#include <linux/time.h>
 #include <sys/errno.h>
-//#include <linux/timex.h>
-//#include <linux/ktime.h>
+#include <sys/time.h>
+#include <sys/sdt.h>
 #include "sim.h"
 #include "sim-assert.h"
 
@@ -9,7 +8,7 @@
 long tk_nin;
 int ticks;
 
-#define HZ 100
+#define HZ 1000
 
 // accessed from wrap_clock from do_sys_settimeofday. We don't call the latter
 // so we should never access this variable.
@@ -80,21 +79,18 @@ void msleep_trampoline (void *context)
   struct SimTask *task = context;
   sim_task_wakeup (task);
 }
-void msleep(unsigned int msecs)
-{
-  sim_event_schedule_ns (((__u64) msecs) * 1000000, &msleep_trampoline, sim_task_current ());
-  sim_task_wait ();
-}
 
 int
 _sleep(void *ident, struct lock_object *lock, int priority,
-    const char *wmesg, int timo)
+    const char *wmesg, sbintime_t sbt, sbintime_t pr, int flags)
 {
-  if (timo)
+  if (sbt)
     {
-      sim_event_schedule_ns (((__u64) timo) * 1000000/HZ, &msleep_trampoline, sim_task_current ());
+      sim_event_schedule_ns (((__u64) sbt) * (1000000/HZ),
+                             &msleep_trampoline, sim_task_current ());
     }
   sim_task_wait ();
+  return 0;
 }
 
 /* FIXME: XXX!!! _sleep/wakeup should be implemented for sbwait like operation */
