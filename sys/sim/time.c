@@ -10,6 +10,7 @@
 
 // kern/kern_clock.c
 long tk_nin;
+volatile int ticks;
 
 #define HZ hz
 

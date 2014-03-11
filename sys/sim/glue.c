@@ -1420,6 +1420,14 @@ u_long	atomic_fetchadd_long(volatile u_long *p, u_long v)
   return (value);
 }
 
+uint32_t
+atomic_load_acq_int(volatile uint32_t *p)
+{
+  uint32_t v;
+  v = *p;
+  return (v);
+}
+
 void
 atomic_store_rel_int(volatile uint32_t *dst, uint32_t src)
 {
@@ -1437,6 +1445,18 @@ atomic_add_rel_int(volatile u_int32_t *p, u_int32_t val)
   atomic_add_barr_int (p, val);
 }
 
+void
+atomic_subtract_acq_int(volatile u_int32_t *p, u_int32_t val)
+{
+  *p -= val;
+}
+
+void
+atomic_subtract_int(volatile u_int32_t *p, u_int32_t val)
+{
+  atomic_subtract_acq_int (p, val);
+}
+
 
 u_long
 atomic_cmpset_acq_ptr(volatile u_long *p, volatile u_long cmpval, volatile u_long newval)
@@ -1449,6 +1469,7 @@ atomic_set_32(volatile uint32_t *address, uint32_t setmask)
 {
   *address |= setmask;
 }
+
 
 struct fileops vnops;
 struct fileops badfileops;

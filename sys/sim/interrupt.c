@@ -108,10 +108,26 @@ swi_add(struct intr_event **eventp, const char *name, driver_intr_t handler,
   strlcpy(ih->ih_name, name, sizeof(ih->ih_name));
   TAILQ_INSERT_TAIL(&ie->ie_handlers, ih, ih_next);
 
-    debugf("swi_add: %0x \"%s\" %0x %0x %i %i %0x\n",
-            eventp, name, handler, arg, pri, flags, cookiep);
+  debugf("swi_add: %0x \"%s\" %0x %0x %i %i %0x\n",
+         eventp, name, handler, arg, pri, flags, cookiep);
 
     return 0;
+}
+
+void
+swi_sched(void *cookie, int flags)
+{
+  struct intr_handler *ih = (struct intr_handler *)cookie;
+  if (!ih)
+    return;
+
+  debugf("swi_sched: %s %p\n", ih->ih_name, cookie);
+  return;
+  struct intr_event *ie = ih->ih_event;
+  TAILQ_INSERT_TAIL(&event_list, ie, ie_list);
+
+
+  return;
 }
 
 void do_softirq (void)
@@ -146,7 +162,7 @@ void do_softirq (void)
       }
 
       /* Execute this handler. */
-#if 0
+#if 1
       debugf("%s: exec %p(%p) for %s flg=%x\n",
              __func__, (void *)ih->ih_handler, 
              ih->ih_argument, ih->ih_name, ih->ih_flags);

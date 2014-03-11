@@ -65,7 +65,7 @@ all: library modules
 -include objs.mk
 
 # note: the directory order below matters to ensure that we match the kernel order
-dirs=kern/ netinet/ netinet/cc/ net/ netinet6/ sim/compile/DCE/ fs/devfs/ crypto/siphash/ libkern/
+dirs=kern/ netinet/ netinet/cc/ net/ netinet6/ sim/compile/DCE/ fs/devfs/ crypto/ crypto/siphash/ libkern/
 #netipsec/ crypto/ \
 #crypto/des/ crypto/cast128/ crypto/blowfish/ crypto/rc4/ \
 #crypto/rijndael/ crypto/sha2/ 
@@ -100,7 +100,7 @@ ip_divert.o tcp_hostcache.o ip_ecn.o tcp_input.o ip_encap.o \
 tcp_lro.o ip_fastfwd.o tcp_offload.o ip_gre.o tcp_output.o \
 ip_icmp.o tcp_reass.o ip_id.o tcp_sack.o ip_input.o tcp_subr.o \
 tcp_syncache.o ip_mroute.o tcp_timer.o ip_options.o tcp_timewait.o \
-ip_output.o tcp_usrreq.o raw_ip.o udp_usrreq.o if_llatbl.o
+ip_output.o tcp_usrreq.o raw_ip.o udp_usrreq.o if_llatbl.o mptcp_subr.o
 #sctp_auth.o sctp_bsd_addr.o sctp_cc_functions.o sctp_crc32.o 
 #sctp_indata.o sctp_input.o sctp_output.o sctp_pcb.o sctp_peeloff.o
 #sctp_ss_functions.o sctp_sysctl.o sctp_timer.o sctp_usrreq.o
@@ -112,6 +112,7 @@ ip6_output.o mld6.o nd6.o nd6_nbr.o nd6_rtr.o raw_ip6.o \
 route6.o scope6.o send.o udp6_usrreq.o 
 #sctp6_usrreq.o
 sim/compile/DCE/_to_keep=vnode_if.o
+crypto/_to_keep=sha1.o
 crypto/siphash/_to_keep=siphash.o
 libkern/_to_keep=strcmp.o strncmp.o strlen.o strcpy.o strncpy.o strlcpy.o strtoq.o \
 strtouq.o bcmp.o inet_ntoa.o
