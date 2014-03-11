@@ -485,9 +485,10 @@ int new_ifioctl(
 
 	return error;
 }
+
 void
-fake_ether_set_addr(struct ifnet *ifp, char *ifname, uint32_t ipn,
-                    uint32_t ip_maskn)
+fake_ipv4_set_addr(struct ifnet *ifp, char *ifname, uint32_t ipn,
+                   uint32_t ip_maskn)
 {
   /* The below function was originally from Alpine but has been modified
      since. */
@@ -572,18 +573,6 @@ struct SimDevice *sim_dev_create (void *priv, enum SimDevFlags flags)
   bpfattach(&ifp->ifp, DLT_EN10MB, ETHER_HDR_LEN);
 
   //printf("Fake interface attached.\n");
-
-  /* FIXME */
-  struct in_addr addr, mask;
-  inet_aton ("255.0.0.0", &mask);
-  if (flags & (1<<4))
-    inet_aton ("10.0.0.1", &addr);
-  else
-    inet_aton ("10.0.0.2", &addr);
-
-  fake_ether_set_addr(&ifp->ifp, ifp->ifp.if_xname,
-                      (uint32_t)addr.s_addr, (uint32_t)mask.s_addr);
-
   /* set ether address */
   ifp->ifp.if_broadcastaddr = etherbroadcastaddr;
   ifp->ifp.if_addrlen = ETHER_ADDR_LEN;
@@ -665,5 +654,16 @@ void sim_dev_rx (struct SimDevice *device, struct SimDevicePacket packet)
   void *packetdata = packet.buffer;
 
   fake_ether_input (ifp, packetdata, size);
+  return;
+}
+
+void sim_dev_ipv4_set_address (struct SimDevice *device, uint32_t ipn,
+                               uint32_t ip_maskn)
+{
+  struct ifnet *ifp = &device->ifp;
+  debugf("sim_dev_ipv4_set_address to:%s, %s\n", ifp->if_xname,
+         inet_ntoa (*((struct in_addr *)&ipn)));
+
+  fake_ipv4_set_addr (ifp, ifp->if_xname, ipn, ip_maskn);
   return;
 }
