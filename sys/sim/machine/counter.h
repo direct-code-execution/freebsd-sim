@@ -77,7 +77,6 @@ counter_u64_zero_inline(counter_u64_t c)
 #endif
 
 #define	counter_u64_add_protected(c, inc)	do {	\
-	CRITICAL_ASSERT(curthread);			\
 	*(uint64_t *)(c) += (inc);		\
 } while (0)
 

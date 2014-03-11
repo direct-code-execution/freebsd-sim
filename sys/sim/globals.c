@@ -63,6 +63,8 @@
 #include <vm/uma_int.h>
 #include <vm/uma_dbg.h>
 
+#include <ddb/ddb.h>
+#include <ddb/db_command.h>
 
 /* The Giant mutex. Woot. */
 #if 0
@@ -98,6 +100,7 @@ static l_start_t	l_nostart;*/
 long physmem;
 long realmem;
 int elf32_fallback_brand = -1;
+int elf64_fallback_brand = -1;
 struct vmmeter cnt;
 
 /*
@@ -136,6 +139,7 @@ struct	linesw *linesw[MAXLDISC];
 
 // vm/vm_kern.c
 vm_map_t kmem_map = 0;
+vm_map_t kernel_map;
 
 // libkern/bcd.c
 /* This is actually used with radix [2..36] */
@@ -153,6 +157,8 @@ MALLOC_DEFINE(M_TEMP, "temp", "misc temporary data buffers");
 MALLOC_DEFINE(M_IP6OPT, "ip6opt", "IPv6 options");
 MALLOC_DEFINE(M_IP6NDP, "ip6ndp", "IPv6 Neighbor Discovery");
 MALLOC_DEFINE(M_DEVBUF, "devbuf", "device driver memory");
+MALLOC_DEFINE(M_SUBPROC, "subproc", "Proc sub-structures");
+MALLOC_DEFINE(M_IOV, "iov", "large iov's");
 
 // externed in kern/kern_conf.c:47. It says "Built at compile time from sys/conf/majors"
 unsigned char reserved_majors[256];
@@ -160,9 +166,23 @@ unsigned char reserved_majors[256];
 
 
 struct mtx sched_lock;
+struct mtx Giant;
 
 
-
+int			cpu_disable_deep_sleep = 0; /* Timer dies in C3. */
 u_int cpuid = 1;
 int kdb_active = 0;
 struct thread *kdb_thread = NULL;	/* Current thread. */
+
+int unmapped_buf_allowed = 1;
+
+struct proclist allproc;
+struct sx allproc_lock;
+struct sx proctree_lock;
+
+volatile int	db_pager_quit;			/* user requested quit */
+struct command_table db_show_table;
+struct command_table db_show_all_table;
+
+struct filterops sig_filtops;
+struct filterops fs_filtops;

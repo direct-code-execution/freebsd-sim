@@ -55,7 +55,7 @@ ifeq ($(PROCESSOR_SIZE),64)
 CFLAGS+= -DCONFIG_64BIT
 endif
 
-LDFLAGS += -shared -nodefaultlibs -lc -g3 -Wl,-O0 -Wl,-Tlinker.lds 
+LDFLAGS += -shared -nodefaultlibs -g3 -Wl,-O0 -Wl,-Tlinker.lds 
 
 modules:=
 all-obj-for-clean:=
@@ -65,7 +65,7 @@ all: library modules
 -include objs.mk
 
 # note: the directory order below matters to ensure that we match the kernel order
-dirs=kern/ netinet/ netinet/cc/ net/ netinet6/ sys/sim/compile/DCE/ fs/devfs/
+dirs=kern/ netinet/ netinet/cc/ net/ netinet6/ sim/compile/DCE/ fs/devfs/ crypto/siphash/ libkern/
 #netipsec/ crypto/ \
 #crypto/des/ crypto/cast128/ crypto/blowfish/ crypto/rc4/ \
 #crypto/rijndael/ crypto/sha2/ 
@@ -111,6 +111,10 @@ in6_rmx.o in6_src.o ip6_forward.o ip6_id.o ip6_input.o ip6_mroute.o \
 ip6_output.o mld6.o nd6.o nd6_nbr.o nd6_rtr.o raw_ip6.o \
 route6.o scope6.o send.o udp6_usrreq.o 
 #sctp6_usrreq.o
+sim/compile/DCE/_to_keep=vnode_if.o
+crypto/siphash/_to_keep=siphash.o
+libkern/_to_keep=strcmp.o strncmp.o strlen.o strcpy.o strncpy.o strlcpy.o strtoq.o \
+strtouq.o bcmp.o inet_ntoa.o
 
 objs.mk: Makefile.print Makefile
 	-for i in 1; do \
@@ -150,7 +154,7 @@ addheader: config
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/bus_if.m -h
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/linker_if.m -h
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/clock_if.m -h
-	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/vnode_if.awk ../../../kern/vnode_if.src -q -p -h
+	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/vnode_if.awk ../../../kern/vnode_if.src -q -p -h -c
 
 buildkernel: $(KERNEL_LIB)
 modules: $(modules) 
