@@ -86,7 +86,6 @@ FORWARDER2(sim_dev_set_mtu, void, void, struct SimDevice *, int);
 extern void *sim_dev_get_private (struct SimDevice *);
 FORWARDER2(sim_dev_create_packet,nvoid, struct SimDevicePacket, struct SimDevice *, int);
 FORWARDER2(sim_dev_rx,void, void, struct SimDevice *, struct SimDevicePacket);
-FORWARDER3(sim_dev_ipv4_set_address,void, void, struct SimDevice *, uint32_t, uint32_t);
 
 FORWARDER4(sim_sock_socket, nvoid, int, int, int, int, struct SimSocket **);
 FORWARDER1(sim_sock_close, nvoid, int, struct SimSocket *);
@@ -99,7 +98,7 @@ FORWARDER4(sim_sock_connect, nvoid, int, struct SimSocket *,const struct sockadd
 FORWARDER2(sim_sock_listen,nvoid, int, struct SimSocket *,int);
 FORWARDER2(sim_sock_shutdown,nvoid, int, struct SimSocket *,int);
 FORWARDER3(sim_sock_accept,nvoid, int, struct SimSocket *,struct SimSocket **, int);
-FORWARDER3(sim_sock_ioctl,nvoid, int, struct SimSocket *, int, char *);
+FORWARDER3(sim_sock_ioctl,nvoid, int, struct SimSocket *, unsigned long, char *);
 FORWARDER5(sim_sock_setsockopt,nvoid, int, struct SimSocket *, int, int, const void *, int);
 FORWARDER5(sim_sock_getsockopt,nvoid, int, struct SimSocket *, int, int, void *, int *);
 
@@ -182,7 +181,6 @@ void sim_init (struct SimExported *exported, const struct SimImported *imported,
   exported->dev_set_mtu = sim_dev_set_mtu_forwarder;
   exported->dev_create_packet = sim_dev_create_packet_forwarder;
   exported->dev_rx = sim_dev_rx_forwarder;
-  exported->dev_ipv4_set_address = sim_dev_ipv4_set_address_forwarder;
 
   exported->sys_iterate_files = sim_sys_iterate_files_forwarder;
   exported->sys_file_write = sim_sys_file_write_forwarder;
