@@ -166,7 +166,7 @@ clean:
 	@rm -rf  linker.lds objs.mk vers.c 2>/dev/null
 	@rm -f $(CONFIG_OBJ) $(CONFIG_DIR)/config.c $(CONFIG_DIR)/y.tab.h ./config
 
-$(KERNEL_LIB): objs.mk addheader $(OBJS) linker.lds vers.c
+$(KERNEL_LIB): addheader objs.mk $(OBJS) linker.lds vers.c
 	$(CC) $(LDFLAGS) -Wl,--whole-archive $(OBJS) -o $@
 	mv $(KERNEL_LIB) $(SRCDIR)
 	cd $(SRCDIR) ; ln -f -s $(KERNEL_LIB) libfreebsd.so
