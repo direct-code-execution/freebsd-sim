@@ -128,7 +128,7 @@ linker.lds: ./generate-linker-script.py
 	ld -shared --verbose | ./$^ > $@
 
 vers.c:
-	sh $(SRCDIR)/sys/conf/newvers.sh >& /dev/null
+	sh $(SRCDIR)/sys/conf/newvers.sh > /dev/null 2>&1 
 
 KERNEL_BUILTIN=$(addprefix $(SRCDIR)/sys/,$(addsuffix builtin.o,$(dirs)))
 OBJS=$(SIM_OBJ) $(foreach builtin,$(KERNEL_BUILTIN),$(if $($(builtin)),$($(builtin))))
