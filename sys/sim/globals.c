@@ -187,3 +187,5 @@ struct command_table db_show_all_table;
 
 struct filterops sig_filtops;
 struct filterops fs_filtops;
+
+int devfs_iosize_max_clamp = 1;

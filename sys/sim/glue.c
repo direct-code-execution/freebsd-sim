@@ -467,7 +467,9 @@ int tvtohz(struct timeval *tv)
   return ((int)ticks);
 }
 
-vm_offset_t kmem_malloc(vm_map_t map, vm_size_t size, int flags)
+struct vmem *kernel_arena = NULL;
+
+vm_offset_t kmem_malloc(struct vmem* map, vm_size_t size, int flags)
 {
   vm_offset_t ptr;
   UNIMPLEMENED_NOASSERT();
@@ -1497,6 +1499,20 @@ vn_chown(struct file *fp, uid_t uid, gid_t gid, struct ucred *active_cred,
 }
 
 int
+vn_sendfile(struct file *fp, int sockfd, struct uio *hdr_uio,
+    struct uio *trl_uio, off_t offset, size_t nbytes, off_t *sent, int flags,
+    int kflags, struct thread *td)
+{
+  return 0;
+}
+
+int
+vn_seek(struct file *fp, off_t offset, int whence, struct thread *td)
+{
+  return 0;
+}
+
+int
 invfo_chmod(struct file *fp, mode_t mode, struct ucred *active_cred,
     struct thread *td)
 {
@@ -1507,6 +1523,14 @@ int
 invfo_chown(struct file *fp, uid_t uid, gid_t gid, struct ucred *active_cred,
     struct thread *td)
 {
+	return (EINVAL);
+}
+
+int invfo_sendfile(struct file *fp, int sockfd, struct uio *hdr_uio,
+    struct uio *trl_uio, off_t offset, size_t nbytes, off_t *sent, int flags,
+    int kflags, struct thread *td)
+{
+
 	return (EINVAL);
 }
 
