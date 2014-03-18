@@ -117,7 +117,7 @@ crypto/siphash/_to_keep=siphash.o
 libkern/_to_keep=strcmp.o strncmp.o strlen.o strcpy.o strncpy.o strlcpy.o strtoq.o \
 strtouq.o bcmp.o inet_ntoa.o
 
-objs.mk: Makefile.print Makefile
+objs.mk: Makefile.print Makefile compile/DCE/vnode_if.c
 	-for i in 1; do \
 	$(foreach d,$(dirs), \
            $(MAKE) -i -s -f $< srcdir=$(SRCDIR)/sys/$(d) \
@@ -155,7 +155,9 @@ addheader: config
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/bus_if.m -h
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/linker_if.m -h
 	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/makeobjops.awk ../../../kern/clock_if.m -h
-	@cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/vnode_if.awk ../../../kern/vnode_if.src -q -p -h -c
+	cd $(SRCDIR)/sys/sim/compile/DCE; awk -f ../../../tools/vnode_if.awk ../../../kern/vnode_if.src -q -p -h -c
+
+compile/DCE/vnode_if.c: addheader
 
 buildkernel: $(KERNEL_LIB)
 modules: $(modules) 
