@@ -79,6 +79,14 @@ kthread_add(void (*func)(void *), void *arg, struct proc *p,
   return 0;
 }
 
+int
+kproc_create(void (*func)(void *), void *arg,
+    struct proc **newpp, int flags, int pages, const char *fmt, ...)
+{
+  struct SimTask *task = sim_task_start ((void (*)(void*))func, arg);  
+  return 0;
+}
+
 #if 0
 struct task_struct *get_current(void)
 {

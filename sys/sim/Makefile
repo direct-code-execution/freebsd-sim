@@ -100,22 +100,22 @@ ip_divert.o tcp_hostcache.o ip_ecn.o tcp_input.o ip_encap.o \
 tcp_lro.o ip_fastfwd.o tcp_offload.o ip_gre.o tcp_output.o \
 ip_icmp.o tcp_reass.o ip_id.o tcp_sack.o ip_input.o tcp_subr.o \
 tcp_syncache.o ip_mroute.o tcp_timer.o ip_options.o tcp_timewait.o \
-ip_output.o tcp_usrreq.o raw_ip.o udp_usrreq.o if_llatbl.o mptcp_subr.o
-#sctp_auth.o sctp_bsd_addr.o sctp_cc_functions.o sctp_crc32.o 
-#sctp_indata.o sctp_input.o sctp_output.o sctp_pcb.o sctp_peeloff.o
-#sctp_ss_functions.o sctp_sysctl.o sctp_timer.o sctp_usrreq.o
-#sctputil.o sctp_asconf.o
+ip_output.o tcp_usrreq.o raw_ip.o udp_usrreq.o if_llatbl.o mptcp_subr.o \
+sctp_auth.o sctp_bsd_addr.o sctp_cc_functions.o sctp_crc32.o \
+sctp_indata.o sctp_input.o sctp_output.o sctp_pcb.o sctp_peeloff.o \
+sctp_ss_functions.o sctp_sysctl.o sctp_timer.o sctp_usrreq.o \
+sctputil.o sctp_asconf.o 
 netinet6/_to_keep=dest6.o frag6.o icmp6.o in6.o in6_cksum.o in6_gif.o \
 in6_ifattach.o in6_mcast.o in6_pcb.o in6_pcbgroup.o in6_proto.o \
 in6_rmx.o in6_src.o ip6_forward.o ip6_id.o ip6_input.o ip6_mroute.o \
 ip6_output.o mld6.o nd6.o nd6_nbr.o nd6_rtr.o raw_ip6.o \
-route6.o scope6.o send.o udp6_usrreq.o 
-#sctp6_usrreq.o
+route6.o scope6.o send.o udp6_usrreq.o \
+sctp6_usrreq.o
 sim/compile/DCE/_to_keep=vnode_if.o
 crypto/_to_keep=sha1.o
 crypto/siphash/_to_keep=siphash.o
 libkern/_to_keep=strcmp.o strncmp.o strlen.o strcpy.o strncpy.o strlcpy.o strtoq.o \
-strtouq.o bcmp.o inet_ntoa.o
+strtouq.o bcmp.o inet_ntoa.o crc32.o
 
 objs.mk: Makefile.print Makefile compile/DCE/vnode_if.c
 	-for i in 1; do \
