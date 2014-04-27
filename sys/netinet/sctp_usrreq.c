@@ -498,7 +498,12 @@ sctp_attach(struct socket *so, int proto SCTP_UNUSED, struct thread *p SCTP_UNUS
 		return (EINVAL);
 	}
 	if (so->so_snd.sb_hiwat == 0 || so->so_rcv.sb_hiwat == 0) {
+#if 0 /* XXX. This code should be uncomment once sysctl for DCE is supported.  */
 		error = SCTP_SORESERVE(so, SCTP_BASE_SYSCTL(sctp_sendspace), SCTP_BASE_SYSCTL(sctp_recvspace));
+#else
+		error = SCTP_SORESERVE(so, 1864135, 1864135);
+#endif
+
 		if (error) {
 			return (error);
 		}

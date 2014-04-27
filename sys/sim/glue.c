@@ -397,6 +397,27 @@ void *hashinit(int elements, struct malloc_type *type, u_long *hashmask)
 }
 
 /*
+ * General routine to allocate a hash table with control of memory flags.
+ */
+void *
+hashinit_flags(int elements, struct malloc_type *type, u_long *hashmask,
+    int flags) 
+{
+	hashinit(elements, type, hashmask);
+}
+
+void
+hashdestroy(void *vhashtbl, struct malloc_type *type, u_long hashmask)
+{
+   LIST_HEAD(generic, generic) *hashtbl, *hp;
+
+   hashtbl = vhashtbl;
+   for (hp = hashtbl; hp <= &hashtbl[hashmask]; hp++)
+     KASSERT(LIST_EMPTY(hp), ("%s: hash not empty", __func__));
+   free(hashtbl, type);
+}
+
+/*
  * ldisc_register: Register a line discipline.
  *
  * discipline: Index for discipline to load, or LDISC_LOAD for us to choose.
@@ -549,6 +570,9 @@ int kthread_create(void (*func)(void *), void *arg,
   return 0;
 }
 
+void kthread_exit() 
+{
+}
 
 int ttykqfilter(struct cdev *dev, struct knote *kn)
 {
@@ -654,6 +678,13 @@ int _mtx_trylock(struct mtx *m, int opts, const char *file, int line)
   // is just a list of some assembler. Lovely.
   return 1;
 }
+
+int _mtx_trylock_flags_(volatile uintptr_t *c, int opts, const char *file, int line)
+{
+  *c = curthread;
+  return 1;
+}
+
 // --------------------------------------------------------------------------
 // All functions below are empty stubs, returning void
 // --------------------------------------------------------------------------
@@ -685,12 +716,14 @@ _mtx_destroy(volatile uintptr_t *c)
 void
 __mtx_lock_flags(volatile uintptr_t *c, int opts, const char *file, int line)
 {
+  *c = curthread;
   return;
 }
 
 void
 __mtx_unlock_flags(volatile uintptr_t *c, int opts, const char *file, int line)
 {
+  *c = 0;
   return;
 }
 
@@ -880,6 +913,13 @@ sx_destroy(struct sx *sx)
 {
   return;
 }
+
+int
+sx_try_xlock_(struct sx *sx, const char *file, int line)
+{
+  return 0;
+}
+
 
 int
 _sx_slock(struct sx *sx, int opts, const char *file, int line)
